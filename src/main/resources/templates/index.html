@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POLL.INTEL | Enterprise Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --brand-primary: #00f2ff;
+            --brand-secondary: #7000ff;
+            --surface-deep: #05070a;
+            --surface-card: rgba(13, 17, 23, 0.85);
+            --border-glow: rgba(0, 242, 255, 0.3);
+            --text-high: #ffffff;
+            --text-low: #8b949e;
+            --danger: #ff4b2b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--surface-deep);
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(112, 0, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(0, 242, 255, 0.1) 0%, transparent 40%);
+            color: var(--text-high);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .app-shell { max-width: 1400px; margin: 0 auto; }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 3rem;
+        }
+
+        .logo { font-size: 1.5rem; font-weight: 900; letter-spacing: 4px; color: var(--brand-primary); }
+        .system-status { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--brand-primary); display: flex; align-items: center; gap: 8px; }
+        .status-pulse { width: 8px; height: 8px; background: var(--brand-primary); border-radius: 50%; box-shadow: 0 0 10px var(--brand-primary); animation: pulse 2s infinite; }
+
+        .engine-room {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .input-panel {
+            background: var(--surface-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            position: sticky;
+            top: 2rem;
+            backdrop-filter: blur(25px);
+        }
+
+        .panel-header {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-low);
+            margin-bottom: 2rem;
+            border-left: 3px solid var(--brand-primary);
+            padding-left: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .form-field { margin-bottom: 1.5rem; }
+        .form-field label { display: block; font-size: 0.8rem; margin-bottom: 0.6rem; color: var(--brand-primary); font-family: 'JetBrains Mono', monospace; }
+
+        input {
+            width: 100%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 1rem;
+            color: white;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+        }
+
+        input:focus { border-color: var(--brand-primary); outline: none; box-shadow: 0 0 15px var(--border-glow); background: rgba(0,0,0,0.7); }
+
+        .variable-stack { max-height: 300px; overflow-y: auto; margin-bottom: 1.5rem; }
+        .variable-node { display: flex; align-items: center; gap: 10px; margin-bottom: 0.8rem; }
+
+        .remove-node { color: var(--text-low); cursor: pointer; transition: 0.2s; }
+        .remove-node:hover { color: var(--danger); }
+
+        .btn-action {
+            width: 100%;
+            padding: 1rem;
+            background: transparent;
+            border: 1px solid var(--brand-primary);
+            color: var(--brand-primary);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn-action:hover { background: var(--brand-primary); color: var(--surface-deep); box-shadow: 0 0 25px var(--brand-primary); }
+
+        .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 1.5rem; }
+
+        .data-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.04), transparent);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 2rem;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .data-card:hover { border-color: var(--brand-primary); transform: translateY(-5px); background: rgba(255,255,255,0.06); }
+
+        .question-text { font-size: 1.3rem; font-weight: 700; margin: 1rem 0; color: var(--text-high); }
+
+        .metric-row {
+            margin-bottom: 1.2rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.02);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .metric-row:hover { background: rgba(255,255,255,0.07); }
+
+        .metric-label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.6rem; }
+        .metric-bar-bg { height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+        .metric-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--brand-secondary), var(--brand-primary));
+            transition: width 1.2s cubic-bezier(0.1, 0.7, 1.0, 0.1);
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 2rem;
+            background: var(--brand-primary);
+            color: var(--surface-deep);
+            font-weight: 800;
+            border-radius: 4px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 0 20px var(--brand-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+    </style>
+</head>
+<body>
+
+<div id="toast">SYSTEM NOTIFICATION: ACTION COMPLETE</div>
+
+<div class="app-shell">
+    <nav>
+        <div class="logo">POLL.INTEL</div>
+        <div class="system-status">
+            <span class="status-pulse"></span>
+            DATABASE NODE: <span id="node-status">SYNCHRONIZED</span>
+        </div>
+    </nav>
+
+    <main class="engine-room">
+        <aside class="input-panel">
+            <div class="panel-header">Intelligence Configuration</div>
+            <div class="form-field">
+                <label>Subject Inquiry</label>
+                <input type="text" id="masterQuestion" placeholder="Define Inquiry Parameters...">
+            </div>
+            <div class="form-field">
+                <label>Data Vectors (Options)</label>
+                <div id="vectorStack" class="variable-stack">
+                    <div class="variable-node"><input type="text" class="vec-input" placeholder="Vector 01"></div>
+                    <div class="variable-node"><input type="text" class="vec-input" placeholder="Vector 02"></div>
+                </div>
+                <button class="btn-action" style="padding: 0.6rem; font-size: 0.7rem; border-style: dashed;" onclick="addVector()">+ Append New Vector</button>
+            </div>
+            <button class="btn-action" onclick="initiateDeployment()">Deploy Intelligence Object</button>
+        </aside>
+
+        <section>
+            <div class="panel-header">Active Analytic Streams</div>
+            <div id="masterGrid" class="data-grid">
+                <!-- Polls appear here -->
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    const API_ENDPOINT = '/api/polls';
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = `STATUS: ${msg}`;
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
+
+    async function syncSystem() {
+        document.getElementById('node-status').innerText = "UPDATING...";
+        try {
+            const response = await fetch(API_ENDPOINT);
+            if (!response.ok) throw new Error("Sync Failure");
+            const data = await response.json();
+            const grid = document.getElementById('masterGrid');
+            grid.innerHTML = data.length ? '' : '<div style="color: var(--text-low); font-family: JetBrains Mono;">[NO ACTIVE DATA STREAMS FOUND]</div>';
+
+            data.reverse().forEach(poll => {
+                const totalVotes = poll.options.reduce((sum, o) => sum + (o.voteCount || 0), 0);
+
+                const card = document.createElement('div');
+                card.className = 'data-card';
+                card.innerHTML = `
+                    <div style="font-family: JetBrains Mono; font-size: 0.6rem; color: var(--text-low)">ID_REF: ${poll.id}</div>
+                    <div class="question-text">${poll.question}</div>
+                    <div>
+                        ${poll.options.map((opt, i) => {
+                            // MATCHING BACKEND NAMES: voteOption and voteCount[cite: 1, 2]
+                            const ratio = totalVotes > 0 ? ((opt.voteCount || 0) / totalVotes) * 100 : 0;
+                            return `
+                                <div class="metric-row" onclick="transmitVote(${poll.id}, ${i})">
+                                    <div class="metric-label">
+                                        <span>${opt.voteOption}</span>
+                                        <span style="color: var(--brand-primary)">${ratio.toFixed(1)}%</span>
+                                    </div>
+                                    <div class="metric-bar-bg">
+                                        <div class="metric-bar-fill" style="width: ${ratio}%"></div>
+                                    </div>
+                                    <div style="font-size: 0.6rem; color: var(--text-low); margin-top: 8px; font-family: JetBrains Mono">
+                                        VOTE_COUNT: ${opt.voteCount || 0}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <div style="text-align: right; font-size: 0.7rem; color: var(--brand-primary); font-family: JetBrains Mono; margin-top: 10px;">
+                        AGGREGATE_METRICS: ${totalVotes}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            document.getElementById('node-status').innerText = "SYNCHRONIZED";
+        } catch (e) {
+            document.getElementById('node-status').innerText = "CONNECTION FAILURE";
+            console.error(e);
+        }
+    }
+
+    async function initiateDeployment() {
+        const question = document.getElementById('masterQuestion').value;
+        const inputs = document.querySelectorAll('.vec-input');
+        const options = Array.from(inputs)
+            .map(v => ({ voteOption: v.value, voteCount: 0 })) // MATCHES OptionVote.java
+            .filter(v => v.voteOption.trim() !== "");
+
+        if (!question || options.length < 2) {
+            showToast("ERROR: INCOMPLETE PAYLOAD");
+            return;
+        }
+
+        await fetch(API_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question, options })
+        });
+
+        document.getElementById('masterQuestion').value = '';
+        document.getElementById('vectorStack').innerHTML = `
+            <div class="variable-node"><input type="text" class="vec-input" placeholder="Vector 01"></div>
+            <div class="variable-node"><input type="text" class="vec-input" placeholder="Vector 02"></div>
+        `;
+        showToast("POLL DEPLOYED");
+        syncSystem();
+    }
+
+    async function transmitVote(pollId, optionIndex) {
+        // MATCHES Vote.java
+        await fetch(`${API_ENDPOINT}/vote`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pollId, optionIndex })
+        });
+        showToast("VOTE TRANSMITTED");
+        syncSystem();
+    }
+
+    function addVector() {
+        const stack = document.getElementById('vectorStack');
+        const div = document.createElement('div');
+        div.className = 'variable-node';
+        div.innerHTML = `
+            <input type="text" class="vec-input" placeholder="Vector ${stack.children.length + 1}">
+            <i class="fas fa-times remove-node" onclick="this.parentElement.remove()"></i>
+        `;
+        stack.appendChild(div);
+    }
+
+    syncSystem();
+</script>
+</body>
+</html>

@@ -12,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/polls")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class PollController {
     private final PollService pollService;
     @PostMapping
